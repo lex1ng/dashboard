@@ -52,6 +52,8 @@ const (
 	ResourceKindEndpoint                 = "endpoint"
 	ResourceKindNetworkPolicy            = "networkpolicy"
 	ResourceKindIngressClass             = "ingressclass"
+	ResourceKindAdvStatefulSet           = "advstatefulset"
+	ResourceKindCloneSet                 = "cloneset"
 )
 
 // Scalable method return whether ResourceKind is scalable.
@@ -61,6 +63,8 @@ func (k ResourceKind) Scalable() bool {
 		ResourceKindReplicaSet,
 		ResourceKindReplicationController,
 		ResourceKindStatefulSet,
+		ResourceKindAdvStatefulSet,
+		ResourceKindCloneSet,
 	}
 
 	for _, kind := range scalable {

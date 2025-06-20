@@ -16,6 +16,9 @@ package common
 
 import (
 	"context"
+	kruise "github.com/openkruise/kruise-api/apps/v1alpha1"
+	kruisebeta1 "github.com/openkruise/kruise-api/apps/v1beta1"
+	kruiseclientset "github.com/openkruise/kruise-api/client/clientset/versioned"
 
 	apps "k8s.io/api/apps/v1"
 	autoscaling "k8s.io/api/autoscaling/v1"
@@ -127,6 +130,12 @@ type ResourceChannels struct {
 	ClusterRoleBindingList ClusterRoleBindingListChannel
 
 	PodDisruptionBudget PodDisruptionBudgetListChannel
+
+	// List and error channels to AdvStatefulSets
+	AdvStatefulSetList AdvStatefulSetListChannel
+
+	// List and error channels to Clonesets
+	CloneSetList CloneSetListChannel
 }
 
 // ServiceListChannel is a list and error channels to Services.
@@ -990,6 +999,66 @@ func GetIngressClassListChannel(client client.Interface, numReads int) IngressCl
 		list, err := client.NetworkingV1().IngressClasses().List(context.TODO(), helpers.ListEverything)
 		for i := 0; i < numReads; i++ {
 			channel.List <- list
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+type AdvStatefulSetListChannel struct {
+	List  chan *kruisebeta1.StatefulSetList
+	Error chan error
+}
+
+func GetAdvStatefulSetListChannel(client kruiseclientset.Interface,
+	nsQuery *NamespaceQuery, numReads int) AdvStatefulSetListChannel {
+	channel := AdvStatefulSetListChannel{
+		List:  make(chan *kruisebeta1.StatefulSetList, numReads),
+		Error: make(chan error, numReads),
+	}
+
+	go func() {
+		statefulSets, err := client.AppsV1beta1().StatefulSets(nsQuery.ToRequestParam()).List(context.TODO(), helpers.ListEverything)
+		var filteredItems []kruisebeta1.StatefulSet
+		for _, item := range statefulSets.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		statefulSets.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- statefulSets
+			channel.Error <- err
+		}
+	}()
+
+	return channel
+}
+
+type CloneSetListChannel struct {
+	List  chan *kruise.CloneSetList
+	Error chan error
+}
+
+func GetCloneSetListChannel(client kruiseclientset.Interface,
+	nsQuery *NamespaceQuery, numReads int) CloneSetListChannel {
+	channel := CloneSetListChannel{
+		List:  make(chan *kruise.CloneSetList, numReads),
+		Error: make(chan error, numReads),
+	}
+
+	go func() {
+		statefulSets, err := client.AppsV1alpha1().CloneSets(nsQuery.ToRequestParam()).List(context.TODO(), helpers.ListEverything)
+		var filteredItems []kruise.CloneSet
+		for _, item := range statefulSets.Items {
+			if nsQuery.Matches(item.ObjectMeta.Namespace) {
+				filteredItems = append(filteredItems, item)
+			}
+		}
+		statefulSets.Items = filteredItems
+		for i := 0; i < numReads; i++ {
+			channel.List <- statefulSets
 			channel.Error <- err
 		}
 	}()

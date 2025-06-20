@@ -90,6 +90,8 @@ var DerivedResources = map[types.ResourceKind]types.ResourceKind{
 	types.ResourceKindDaemonSet:             types.ResourceKindPod,
 	types.ResourceKindStatefulSet:           types.ResourceKindPod,
 	types.ResourceKindJob:                   types.ResourceKindPod,
+	types.ResourceKindCloneSet:              types.ResourceKindPod,
+	types.ResourceKindAdvStatefulSet:        types.ResourceKindPod,
 }
 
 // ResourceSelector is a structure used to quickly and uniquely identify given resource.

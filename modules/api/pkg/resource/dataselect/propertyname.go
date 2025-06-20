@@ -28,4 +28,7 @@ const (
 	FirstSeenProperty         = "firstSeen"
 	LastSeenProperty          = "lastSeen"
 	ReasonProperty            = "reason"
+	NodeNameProperty          = "nodeName"
+	NodeIPProperty            = "nodeIP"
+	PodIPProperty             = "podIP"
 )

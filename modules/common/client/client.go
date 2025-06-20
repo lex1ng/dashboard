@@ -20,10 +20,13 @@ import (
 	"net/http"
 	"os"
 
+	kruise "github.com/openkruise/kruise-api/apps/v1beta1"
+	kruiseclientset "github.com/openkruise/kruise-api/client/clientset/versioned"
 	v1 "k8s.io/api/authorization/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 
@@ -76,6 +79,22 @@ func Client(request *http.Request) (client.Interface, error) {
 	}
 
 	return client.NewForConfig(config)
+}
+
+func KruiseClient(request *http.Request) (kruiseclientset.Interface, error) {
+	if !isInitialized() {
+		return nil, fmt.Errorf("kruise client package not initialized")
+	}
+
+	config, err := configFromRequest(request)
+	if err != nil {
+		return nil, err
+	}
+
+	kruise.AddToScheme(scheme.Scheme)
+
+	return kruiseclientset.NewForConfigOrDie(config), nil
+
 }
 
 func APIExtensionsClient(request *http.Request) (apiextensionsclientset.Interface, error) {
