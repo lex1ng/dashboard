@@ -1278,20 +1278,21 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Param(apiV1Ws.PathParameter("container", "name of container in the Pod")).
 			Writes([]byte{}).
 			Returns(http.StatusOK, "OK", []byte{}))
+
 	// Advanced StatefulSet
 	apiV1Ws.Route(
 		apiV1Ws.GET("/advstatefulset").To(apiHandler.handleGetAdvStatefulSetList).
 			// docs
 			Doc("returns a list of Advanced StatefulSets from all namespaces").
 			Writes(advstatefulset.AdvStatefulSetList{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetList{}))
+			Returns(http.StatusOK, "OK", advstatefulset.AdvStatefulSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/advstatefulset/{namespace}").To(apiHandler.handleGetAdvStatefulSetList).
 			// docs
 			Doc("returns a list of Advanced StatefulSets in a namespaces").
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the Advanced StatefulSets")).
 			Writes(advstatefulset.AdvStatefulSetList{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetList{}))
+			Returns(http.StatusOK, "OK", advstatefulset.AdvStatefulSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/advstatefulset/{namespace}/{advstatefulset}").To(apiHandler.handleGetAdvStatefulSetDetail).
 			// docs
@@ -1299,7 +1300,7 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the Advanced StatefulSets")).
 			Param(apiV1Ws.PathParameter("advstatefulset", "name of the Advanced StatefulSets")).
 			Writes(advstatefulset.AdvStatefulSetDetail{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetDetail{}))
+			Returns(http.StatusOK, "OK", advstatefulset.AdvStatefulSetDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/advstatefulset/{namespace}/{advstatefulset}/pod").To(apiHandler.handleGetAdvStatefulSetPods).
 			// docs
@@ -1323,14 +1324,14 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			// docs
 			Doc("returns a list of CloneSets from all namespaces").
 			Writes(cloneset.CloneSetList{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetList{}))
+			Returns(http.StatusOK, "OK", cloneset.CloneSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/cloneset/{namespace}").To(apiHandler.handleGetCloneSetList).
 			// docs
 			Doc("returns a list of CloneSets in a namespaces").
 			Param(apiV1Ws.PathParameter("namespace", "namespace of theCloneSets")).
 			Writes(cloneset.CloneSetList{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetList{}))
+			Returns(http.StatusOK, "OK", cloneset.CloneSetList{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/cloneset/{namespace}/{cloneset}").To(apiHandler.handleGetCloneSetDetail).
 			// docs
@@ -1338,7 +1339,7 @@ func CreateHTTPAPIHandler(iManager integration.Manager) (*restful.Container, err
 			Param(apiV1Ws.PathParameter("namespace", "namespace of the CloneSets")).
 			Param(apiV1Ws.PathParameter("cloneset", "name of the CloneSets")).
 			Writes(cloneset.CloneSetDetail{}).
-			Returns(http.StatusOK, "OK", statefulset.StatefulSetDetail{}))
+			Returns(http.StatusOK, "OK", cloneset.CloneSetDetail{}))
 	apiV1Ws.Route(
 		apiV1Ws.GET("/cloneset/{namespace}/{cloneset}/pod").To(apiHandler.handleGetCloneSetPods).
 			// docs
@@ -1758,7 +1759,7 @@ func (in *APIHandler) handleGetServiceList(request *restful.Request, response *r
 
 	namespace := parseNamespacePathParameter(request)
 	dataSelect := parser.ParseDataSelectPathParameter(request)
-	result, err := resourceService.GetServiceList(k8sClient, namespace, dataSelect)
+	result, err := service.GetServiceList(k8sClient, namespace, dataSelect)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -1775,7 +1776,7 @@ func (in *APIHandler) handleGetServiceDetail(request *restful.Request, response 
 
 	namespace := request.PathParameter("namespace")
 	name := request.PathParameter("service")
-	result, err := resourceService.GetServiceDetail(k8sClient, namespace, name)
+	result, err := service.GetServiceDetail(k8sClient, namespace, name)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
@@ -1794,7 +1795,7 @@ func (in *APIHandler) handleGetServiceEvent(request *restful.Request, response *
 	name := request.PathParameter("service")
 	dataSelect := parser.ParseDataSelectPathParameter(request)
 	dataSelect.MetricQuery = dataselect.StandardMetrics
-	result, err := resourceService.GetServiceEvents(k8sClient, dataSelect, namespace, name)
+	result, err := service.GetServiceEvents(k8sClient, dataSelect, namespace, name)
 	if err != nil {
 		errors.HandleInternalError(response, err)
 		return
