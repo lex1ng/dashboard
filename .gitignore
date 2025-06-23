@@ -19,6 +19,8 @@
 .DS_Store
 .fleet/
 
+charts/kubernetes-dashboard-api/
+
 # Build, deps and cache
 .angular
 node_modules
