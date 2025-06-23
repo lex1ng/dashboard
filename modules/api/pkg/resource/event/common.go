@@ -230,8 +230,11 @@ func CreateEventList(events []v1.Event, dsQuery *dataselect.DataSelectQuery) com
 		Events:   make([]common.Event, 0),
 		ListMeta: types.ListMeta{TotalItems: len(events)},
 	}
+	eventCells, filteredTotal := dataselect.GenericDataSelectWithFilter(toCells(events), dsQuery)
+	events = fromCells(eventCells)
+	eventList.ListMeta = types.ListMeta{TotalItems: filteredTotal}
 
-	events = fromCells(dataselect.GenericDataSelect(toCells(events), dsQuery))
+	//events = fromCells(dataselect.GenericDataSelect(toCells(events), dsQuery))
 	for _, event := range events {
 		eventDetail := ToEvent(event)
 		eventList.Events = append(eventList.Events, eventDetail)
